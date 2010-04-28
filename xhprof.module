@@ -19,7 +19,8 @@ $xhprof_profiling_started = false;
 
 /**
  * Implementation of hook_menu().
- */
+ * Commented out
+ * Replaced by hook_menu($may_cache) for Drupal 5
 function xhprof_menu() {
   $items['admin/settings/xhprof'] = array(
     'title' => 'XHProf Settings',
@@ -56,9 +57,12 @@ function xhprof_menu() {
   
 	return $items;
 }
+*/
 
 /**
  * Implementation of hook_boot().
+ * Use hook_init() for Drupal 5
+ * hook_boot() ignored by Drupal 5
  */
 function xhprof_boot() {
   if (!extension_loaded('xhprof') or !function_exists("xhprof_enable")) {
@@ -72,6 +76,64 @@ function xhprof_boot() {
     xhprof_enable(XHPROF_FLAGS_CPU + XHPROF_FLAGS_MEMORY);
     $xhprof_profiling_started = true;
   }
+}
+
+/**
+ * Implementation of hook_menu($may_cache).
+ */
+function xhprof_menu($may_cache) {
+
+  $items = array();
+
+  if ($may_cache) {
+  $items[] = array(
+    'path' => 'admin/settings/xhprof',
+    'title' => 'XHProf Settings',
+    'callback' => 'drupal_get_form',
+    'callback arguments' => 'xhprof_admin_settings',
+    'access' => user_access('administer site configuration'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+  	
+  $items[] = array(
+    'path' => 'admin/xhprof/runs',
+    'title' => 'XHProf Runs',
+    'callback' => 'xhprof_runs_view',
+    'access' => user_access('administer site configuration'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+	
+/*     I wasn't smart enough to make the Run Details view work
+ *     in Drupal 5, so I commented out these menu items until
+ *     further work is completed to port xhprof_runs_view_details
+ *     to Drupal 5.
+  $items[] = array(
+    'path' => 'admin/xhprof/run',
+    'title' => 'XHProf Run Details',
+    'callback' => 'xhprof_runs_view_details',
+    'access' => user_access('administer site configuration'),
+    'type' => MENU_CALLBACK,
+  );
+
+  $items[] = array(
+    'path' => 'admin/xhprof/run/%/%',
+    'title' => 'XHProf Run Details',
+    'callback' => 'xhprof_runs_view_details',
+    'callback arguments' => array(3, 4),
+    'access' => user_access('administer site configuration'),
+    'type' => MENU_CALLBACK,
+  );
+*/
+ } 
+	return $items;
+}
+
+/**
+ * Implementation of hook_init().
+ */
+function xhprof_init() {
+    // Drupal 5 doesn't have hook_boot, so we call it here.
+    xhprof_boot();
 }
 
 /**
@@ -184,6 +246,8 @@ function xhprof_runs_view_form_submit($form, &$form_state) {
  */
 function xhprof_runs_view() {
   $content = array();
+  global $base_url;
+  $module_path = drupal_get_path('module', 'xhprof');
   
   drupal_add_js(drupal_get_path("module", "xhprof") . "/xhprof.js");
   drupal_add_css(drupal_get_path("module", "xhprof") . "/xhprof.css");
@@ -208,7 +272,13 @@ function xhprof_runs_view() {
   $rows = array();
   while ($data = db_fetch_object($result)) {
     $row = array();
-    $row[] = array('data' => l($data->run_id, 'admin/xhprof/run/'.$data->run_id));
+
+    // This is the workaround to avoid the "Run Details view" and 
+    // link directly to the "raw" XHProf report.
+    $report_url = "$base_url/$module_path/xhprof_html/index.php?run=" . 
+		  $data->run_id . "&source=".XHPROF_SOURCE."&sort=excl_wt";
+
+    $row[] = array('data' => l($data->run_id, $report_url));
     $row[] = array('data' => l($data->url, $data->url));
     $row[] = array('data' => number_format($data->time / 1000) . ' ms', 'class' => xhprof_class_from_time($data->time));
     $row[] = array('data' => number_format($data->calls));
@@ -247,6 +317,18 @@ function xhprof_runs_view_details($run_id, $method = "main()") {
 }
 
 /**
+ * Drupal 6's drupal_match_path(), included here for Drupal 5 compatibility
+ */
+function xhprof_drupal_match_path($path, $patterns) {
+  static $regexps;
+
+  if (!isset($regexps[$patterns])) {
+    $regexps[$patterns] = '/^('. preg_replace(array('/(\r\n?|\n)/', '/\\\\\*/', '/(^|\|)\\\\<front\\\\>($|\|)/'), array('|', '.*', '\1'. preg_quote(variable_get('site_frontpage', 'node'), '/') .'\2'), preg_quote($patterns, '/')) .')$/';
+  }
+  return preg_match($regexps[$patterns], $path);
+}
+
+/**
  * Determines whether or not to profile the current request.
  */
 function xhprof_profiling_enabled() {
@@ -262,8 +344,8 @@ function xhprof_profiling_enabled() {
 
   $path = drupal_get_path_alias($_GET['q']);
 
-  return (bool) (drupal_match_path($path, variable_get("xhprof_include_paths", '')) 
-      and !drupal_match_path($path, variable_get("xhprof_exclude_paths", '')));
+  return (bool) (xhprof_drupal_match_path($path, variable_get("xhprof_include_paths", '')) 
+      and !xhprof_drupal_match_path($path, variable_get("xhprof_exclude_paths", '')));
 }
 
 /**
