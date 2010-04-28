@@ -173,7 +173,7 @@ function xhprof_exit() {
     
   $args = array(
     $run_id,
-    $_GET['q'],
+    $_SERVER['SCRIPT_URL'],
     serialize($xhprof_data),
     $xhprof_data['main()']['wt'],
     $total_calls,
