@@ -73,7 +73,14 @@ function xhprof_boot() {
   global $xhprof_profiling_started;
 
   if (xhprof_profiling_enabled()) {
-    xhprof_enable(XHPROF_FLAGS_CPU + XHPROF_FLAGS_MEMORY);
+    $flags = variable_get('xhprof_enable_flags', 
+                          array());
+    $flags_val = 0;
+    $flags_val += ($flags['XHPROF_FLAGS_CPU']) ? XHPROF_FLAGS_CPU : 0;
+    $flags_val += ($flags['XHPROF_FLAGS_MEMORY']) ? XHPROF_FLAGS_MEMORY : 0;
+    $flags_val += ($flags['XHPROF_FLAGS_NO_BUILTINS']) ? XHPROF_FLAGS_NO_BUILTINS : 0;
+
+    xhprof_enable( $flags_val );
     $xhprof_profiling_started = true;
   }
 }
@@ -203,6 +210,18 @@ function xhprof_admin_settings() {
     '#description' => t('XHProf will NOT profile this list of paths.'), 
   );
 
+  $form['xhprof_enable_flags'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('xhprof_enable flags'),
+    '#default_value' => variable_get('xhprof_enable_flags', 
+                                      array()),
+    '#options' => array(
+       'XHPROF_FLAGS_CPU' => t('XHPROF_FLAGS_CPU'),
+       'XHPROF_FLAGS_MEMORY' => t('XHPROF_FLAGS_MEMORY'),
+       'XHPROF_FLAGS_NO_BUILTINS' => t('XHPROF_FLAGS_NO_BUILTINS'),
+    ),
+    '#description' => t('XHPROF_FLAGS_ control what profiling data is captured'),
+  );
   return system_settings_form($form);
 }
 
