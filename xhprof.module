@@ -174,7 +174,7 @@ function xhprof_exit() {
   $args = array(
     $run_id,
     $_SERVER['SCRIPT_URL'],
-    serialize($xhprof_data),
+    0,
     $xhprof_data['main()']['wt'],
     $total_calls,
     $total_memory,
