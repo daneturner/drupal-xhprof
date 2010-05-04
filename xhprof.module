@@ -157,7 +157,7 @@ function xhprof_exit() {
   $xhprof_data = xhprof_disable();
   
   // Include xhprof utils
-  $mod_path = drupal_get_path('module', 'xhprof');
+  $mod_path = dirname(__FILE__);
   include_once $mod_path . '/xhprof_lib/utils/xhprof_lib.php';
   include_once $mod_path . '/xhprof_lib/utils/xhprof_runs.php';
   
