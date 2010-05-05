@@ -38,22 +38,6 @@ function xhprof_menu() {
     'access arguments' => array('administer site configuration'),
     'type' => MENU_NORMAL_ITEM
   );
-	
-  $items['admin/xhprof/run/%'] = array(
-    'title' => 'XHProf Run Details',
-    'description' => 'XHProf Run Details',
-    'page callback' => 'xhprof_runs_view_details',
-    'page arguments' => array(3),
-    'access arguments' => array('administer site configuration')
-  );
-
-  $items['admin/xhprof/run/%/%'] = array(
-    'title' => 'XHProf Run Details',
-    'description' => 'XHProf Run Details',
-    'page callback' => 'xhprof_runs_view_details',
-    'page arguments' => array(3, 4),
-    'access arguments' => array('administer site configuration')
-  );
   
 	return $items;
 }
