@@ -285,7 +285,7 @@ function xhprof_runs_view() {
     $row[] = array('data' => l($data->url, $data->url));
     $row[] = array('data' => number_format($data->time / 1000) . ' ms', 'class' => xhprof_class_from_time($data->time));
     $row[] = array('data' => number_format($data->calls));
-    $row[] = array('data' => number_format($data->memory / 1024) . ' KB');
+    $row[] = array('data' => number_format($data->memory / 10240) . ' KB');
     $row[] = array('data' => number_format($data->cpu));    
     $row[] = array('data' => format_date($data->created, 'small'));
     $rows[] = $row;
