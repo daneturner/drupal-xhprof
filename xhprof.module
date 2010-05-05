@@ -4,6 +4,19 @@
 
 /**
  * @file
+ *
+ * How To Enable XHProf
+ * ======================
+ * xhprof should be enabled early in the bootstrap process
+ * or outside of Drupal entirely.  Using hook_init is not 
+ * entirely satisfying because it happens after most of Drupal's 
+ * bootstrap phases.  A reasonable solution is to enable xhprof from
+ * settings.php, which runs in Drupal's first bootstrap phase.
+ * For example...
+ *
+ * //add this to settings.php
+ * include_once '/xhprof/module/path/xhprof_early_enable.inc'
+ * xhprof_early_enable();
  */
 
 /**
