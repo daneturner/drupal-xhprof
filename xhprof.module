@@ -55,15 +55,6 @@ function xhprof_menu($may_cache) {
 
   if ($may_cache) {
   $items[] = array(
-    'path' => 'admin/settings/xhprof',
-    'title' => 'XHProf Settings',
-    'callback' => 'drupal_get_form',
-    'callback arguments' => 'xhprof_admin_settings',
-    'access' => user_access('administer site configuration'),
-    'type' => MENU_NORMAL_ITEM,
-  );
-  	
-  $items[] = array(
     'path' => 'admin/xhprof/runs',
     'title' => 'XHProf Runs',
     'callback' => 'xhprof_runs_view',
@@ -143,39 +134,6 @@ function xhprof_exit() {
   );
   
   db_query($query, $args);
-}
-
-/**
- * XHProf admin settings
- */
-function xhprof_admin_settings() {
-  $form['xhprof_include_paths'] = array( 
-    '#type' => 'textarea',
-    '#title' => t('Paths to include in profiling'), 
-    '#default_value' => variable_get('xhprof_include_paths', NULL), 
-    '#description' => t('XHProf will profile this list of paths.'), 
-  );
-
-  $form['xhprof_exclude_paths'] = array( 
-    '#type' => 'textarea',
-    '#title' => t('Paths to exclude in profiling'), 
-    '#default_value' => variable_get('xhprof_exclude_paths', NULL), 
-    '#description' => t('XHProf will NOT profile this list of paths.'), 
-  );
-
-  $form['xhprof_enable_flags'] = array(
-    '#type' => 'checkboxes',
-    '#title' => t('xhprof_enable flags'),
-    '#default_value' => variable_get('xhprof_enable_flags', 
-                                      array()),
-    '#options' => array(
-       'XHPROF_FLAGS_CPU' => t('XHPROF_FLAGS_CPU'),
-       'XHPROF_FLAGS_MEMORY' => t('XHPROF_FLAGS_MEMORY'),
-       'XHPROF_FLAGS_NO_BUILTINS' => t('XHPROF_FLAGS_NO_BUILTINS'),
-    ),
-    '#description' => t('XHPROF_FLAGS_ control what profiling data is captured'),
-  );
-  return system_settings_form($form);
 }
 
 /**
