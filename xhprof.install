@@ -46,7 +46,7 @@ function xhprof_install() {
   }
 
   // Make sure profiling starts as early as possible
-  db_query("UPDATE {system} SET weight = %d WHERE name = '%s'", -99, 'XHProf');
+  db_query("UPDATE {system} SET weight = %d WHERE name = '%s'", 199, 'XHProf');
 }
 
 /**
