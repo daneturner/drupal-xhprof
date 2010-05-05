@@ -55,7 +55,7 @@ function xhprof_menu($may_cache) {
 
   if ($may_cache) {
   $items[] = array(
-    'path' => 'admin/xhprof/runs',
+    'path' => 'admin/logs/xhprof',
     'title' => 'XHProf Runs',
     'callback' => 'xhprof_runs_view',
     'access' => user_access('administer site configuration'),
