@@ -7,17 +7,6 @@
  */
 
 /**
- * XHProf calls this both 'source' and 'run_type'.
- * It's basically a way to namespace XHProf runs.
- */
-define('XHPROF_SOURCE', 'drupal_xhprof');
-
-/**
- * Set to true when XHProf profiling has started.
- */
-$xhprof_profiling_started = false;
-
-/**
  * Implementation of hook_menu().
  * Commented out
  * Replaced by hook_menu($may_cache) for Drupal 5
@@ -43,31 +32,6 @@ function xhprof_menu() {
 }
 */
 
-/**
- * Implementation of hook_boot().
- * Use hook_init() for Drupal 5
- * hook_boot() ignored by Drupal 5
- */
-function xhprof_boot() {
-  if (!extension_loaded('xhprof') or !function_exists("xhprof_enable")) {
-    return;
-  }
-  
-  // So we don't waste time checking again on xhprof_exit()  
-  global $xhprof_profiling_started;
-
-  if (xhprof_profiling_enabled()) {
-    $flags = variable_get('xhprof_enable_flags', 
-                          array());
-    $flags_val = 0;
-    $flags_val += ($flags['XHPROF_FLAGS_CPU']) ? XHPROF_FLAGS_CPU : 0;
-    $flags_val += ($flags['XHPROF_FLAGS_MEMORY']) ? XHPROF_FLAGS_MEMORY : 0;
-    $flags_val += ($flags['XHPROF_FLAGS_NO_BUILTINS']) ? XHPROF_FLAGS_NO_BUILTINS : 0;
-
-    xhprof_enable( $flags_val );
-    $xhprof_profiling_started = true;
-  }
-}
 
 /**
  * Implementation of hook_menu($may_cache).
@@ -117,14 +81,6 @@ function xhprof_menu($may_cache) {
 */
  } 
 	return $items;
-}
-
-/**
- * Implementation of hook_init().
- */
-function xhprof_init() {
-    // Drupal 5 doesn't have hook_boot, so we call it here.
-    xhprof_boot();
 }
 
 /**
@@ -317,38 +273,6 @@ function xhprof_runs_view_details($run_id, $method = "main()") {
   $content[] = xhprof_table_for_fn($run, $method);
   
   return implode("\n", $content);
-}
-
-/**
- * Drupal 6's drupal_match_path(), included here for Drupal 5 compatibility
- */
-function xhprof_drupal_match_path($path, $patterns) {
-  static $regexps;
-
-  if (!isset($regexps[$patterns])) {
-    $regexps[$patterns] = '/^('. preg_replace(array('/(\r\n?|\n)/', '/\\\\\*/', '/(^|\|)\\\\<front\\\\>($|\|)/'), array('|', '.*', '\1'. preg_quote(variable_get('site_frontpage', 'node'), '/') .'\2'), preg_quote($patterns, '/')) .')$/';
-  }
-  return preg_match($regexps[$patterns], $path);
-}
-
-/**
- * Determines whether or not to profile the current request.
- */
-function xhprof_profiling_enabled() {
-  require_once 'includes/path.inc';
-  
-  if (isset($_GET['XHPROF_ENABLED'])) {
-    return true;
-  }
-
-  if (isset($_GET['XHPROF_DISABLED'])) {
-    return false;
-  }
-
-  $path = drupal_get_path_alias($_GET['q']);
-
-  return (bool) (xhprof_drupal_match_path($path, variable_get("xhprof_include_paths", '')) 
-      and !xhprof_drupal_match_path($path, variable_get("xhprof_exclude_paths", '')));
 }
 
 /**
