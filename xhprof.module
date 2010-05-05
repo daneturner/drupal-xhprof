@@ -31,7 +31,7 @@ function xhprof_menu() {
     'type' => MENU_NORMAL_ITEM
   );
   	
-  $items['admin/xhprof/runs'] = array(
+  $items['admin/logs/xhprof'] = array(
     'title' => 'XHProf Runs',
     'description' => 'XHProf Runs',
     'page callback' => 'xhprof_runs_view',
